@@ -1,4 +1,54 @@
-# TikTok Trending — 2026-05-13 15:48 UTC
+# TikTok Trending — 2026-05-13 17:14 UTC
 
 | # | Author | Likes | Plays | Link |
 |---|--------|-------|-------|------|
+| 1 | @courtneyzeng | 2,600,000 | 24,600,000 | [video](https://www.tiktok.com/@courtneyzeng/video/7235832053994999082) |
+| 2 | @gingersdosnap | 43 | 305 | [video](https://www.tiktok.com/@gingersdosnap/video/7639398893133827359) |
+| 3 | @themalachibarton | 3,200,000 | 27,900,000 | [video](https://www.tiktok.com/@themalachibarton/video/7370520570070338859) |
+| 4 | @petslife077 | 3,403 | 200,500 | [video](https://www.tiktok.com/@petslife077/video/7537623435929865527) |
+| 5 | @martinkrl | 7,500,000 | 41,800,000 | [video](https://www.tiktok.com/@martinkrl/video/6909470233417862401) |
+| 6 | @bagahsievvaj | 7,100,000 | 56,200,000 | [video](https://www.tiktok.com/@bagahsievvaj/video/7422955567326579990) |
+| 7 | @kallmekris | 3,900,000 | 30,100,000 | [video](https://www.tiktok.com/@kallmekris/video/7321871350694432005) |
+| 8 | @suiynbay | 4,000,000 | 27,000,000 | [video](https://www.tiktok.com/@suiynbay/video/7433526979527216389) |
+| 9 | @monseromoo | 5,200,000 | 39,300,000 | [video](https://www.tiktok.com/@monseromoo/video/7398368289136594206) |
+| 10 | @wat268 | 2,700,000 | 75,700,000 | [video](https://www.tiktok.com/@wat268/video/7291058090605055275) |
+| 11 | @officialmrkebs24 | 5,454 | 67,200 | [video](https://www.tiktok.com/@officialmrkebs24/video/7202787660094508293) |
+| 12 | @miadewaele | 2,800,000 | 24,900,000 | [video](https://www.tiktok.com/@miadewaele/video/7400529000621280544) |
+| 13 | @foryou_sd | 16,000,000 | 135,200,000 | [video](https://www.tiktok.com/@foryou_sd/video/7299279845215702315) |
+| 14 | @wueniica.04 | 4,600,000 | 22,500,000 | [video](https://www.tiktok.com/@wueniica.04/video/7351012839106088224) |
+| 15 | @therealrhondaking | 2,500,000 | 16,900,000 | [video](https://www.tiktok.com/@therealrhondaking/video/7445471727640972574) |
+| 16 | @male.martinezzz | 2,900,000 | 35,800,000 | [video](https://www.tiktok.com/@male.martinezzz/video/7139922584983981318) |
+| 17 | @emikoo7 | 3,200,000 | 93,100,000 | [video](https://www.tiktok.com/@emikoo7/video/7337252171861331232) |
+| 18 | @noelgoescrazy | 13,500,000 | 212,200,000 | [video](https://www.tiktok.com/@noelgoescrazy/video/7227892790988950810) |
+| 19 | @seungbin030708 | 748,000 | 26,300,000 | [video](https://www.tiktok.com/@seungbin030708/video/7152059117631212801) |
+| 20 | @user192819234 | 92 | 378 | [video](https://www.tiktok.com/@user192819234/video/7639399149909085454) |
+| 21 | @justsomelamekid | 73 | 419 | [video](https://www.tiktok.com/@justsomelamekid/video/7639398578674240798) |
+| 22 | @chotasidhu_2m | 3,100,000 | 40,200,000 | [video](https://www.tiktok.com/@chotasidhu_2m/video/7420087691305405728) |
+| 23 | @eemsoyeon | 3,200,000 | 15,900,000 | [video](https://www.tiktok.com/@eemsoyeon/video/7358592338689609003) |
+| 24 | @sweet.tee27 | 4,300,000 | 50,000,000 | [video](https://www.tiktok.com/@sweet.tee27/video/7191809362439064874) |
+| 25 | @moncluscarol | 465,100 | 3,900,000 | [video](https://www.tiktok.com/@moncluscarol/video/7397134365865561376) |
+| 26 | @travis_scott9021000 | 3,900,000 | 25,700,000 | [video](https://www.tiktok.com/@travis_scott9021000/video/7433073842811194666) |
+| 27 | @mya.horn | 76 | 192 | [video](https://www.tiktok.com/@mya.horn/video/7639400047234387230) |
+| 28 | @coricole459 | 9 | 37 | [video](https://www.tiktok.com/@coricole459/video/7639398947185757470) |
+| 29 | @aepnathqn | 2,200,000 | 13,900,000 | [video](https://www.tiktok.com/@aepnathqn/video/7515842668312759583) |
+| 30 | @ii_nangarhari_e_ii | 38 | 237 | [video](https://www.tiktok.com/@ii_nangarhari_e_ii/video/7639398093632359694) |
+| 31 | @usa.funny902 | 9 | 357 | [video](https://www.tiktok.com/@usa.funny902/video/7639400594079321358) |
+| 32 | @male.martinezzz | 2,900,000 | 35,800,000 | [video](https://www.tiktok.com/@male.martinezzz/video/7139922584983981318) |
+| 33 | @tilotama555 | 32 | 154 | [video](https://www.tiktok.com/@tilotama555/video/7639403253876133150) |
+| 34 | @18.survival | 18 | 252 | [video](https://www.tiktok.com/@18.survival/video/7639400114473291021) |
+| 35 | @eemsoyeon | 3,200,000 | 15,900,000 | [video](https://www.tiktok.com/@eemsoyeon/video/7358592338689609003) |
+| 36 | @adnanjoyia1240 | 15 | 59 | [video](https://www.tiktok.com/@adnanjoyia1240/video/7639404564550241544) |
+| 37 | @adjamelais.225 | 77 | 716 | [video](https://www.tiktok.com/@adjamelais.225/video/7639402790158093586) |
+| 38 | @dr.wael_eltawil | 14 | 48 | [video](https://www.tiktok.com/@dr.wael_eltawil/video/7639403783927106830) |
+| 39 | @miso_ara | 3,800,000 | 85,400,000 | [video](https://www.tiktok.com/@miso_ara/video/7128965333435583745) |
+| 40 | @sohail.khan.safi7 | 68 | 378 | [video](https://www.tiktok.com/@sohail.khan.safi7/video/7639404624994159904) |
+| 41 | @appleuser6715423 | 58 | 251 | [video](https://www.tiktok.com/@appleuser6715423/video/7639401299645041934) |
+| 42 | @user192819234 | 92 | 378 | [video](https://www.tiktok.com/@user192819234/video/7639399149909085454) |
+| 43 | @somebeautifullloser | 85 | 488 | [video](https://www.tiktok.com/@somebeautifullloser/video/7639402785255066911) |
+| 44 | @purepressure27 | 6 | 141 | [video](https://www.tiktok.com/@purepressure27/video/7639404737737018654) |
+| 45 | @_mikkekid | 328,800 | 1,800,000 | [video](https://www.tiktok.com/@_mikkekid/video/7315618896684338438) |
+| 46 | @angela.danii | 2,700,000 | 15,100,000 | [video](https://www.tiktok.com/@angela.danii/video/7345350127319551275) |
+| 47 | @only1_keno17 | 34 | 308 | [video](https://www.tiktok.com/@only1_keno17/video/7639401424413003022) |
+| 48 | @hadieastic | 55 | 563 | [video](https://www.tiktok.com/@hadieastic/video/7639400695031975200) |
+| 49 | @kloecsiu | 856 | 298,700 | [video](https://www.tiktok.com/@kloecsiu/video/7277030322758290730) |
+| 50 | @noelgoescrazy | 4,000,000 | 148,100,000 | [video](https://www.tiktok.com/@noelgoescrazy/video/7161114011205963014) |
