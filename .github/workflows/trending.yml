@@ -37,6 +37,7 @@ jobs:
           import asyncio, json, os, time, sys
           from pathlib import Path
           from TikTokApi import TikTokApi
+          from playwright.async_api import async_playwright
 
           OUTPUT_DIR = Path("trending")
           OUTPUT_DIR.mkdir(exist_ok=True)
@@ -71,10 +72,14 @@ jobs:
                       num_sessions=1,
                       browser="webkit",
                       headless=True,
-                      sleep_after=5,
+                      sleep_after=3,
                       ms_tokens=[ms_token] if ms_token else None,
-                      suppress_resource_load_types=["image", "media", "font"],
+                      suppress_resource_load_types=["image", "media", "font", "stylesheet"],
                       starting_url="https://www.tiktok.com",
+                      timeout=60000,   # 60s instead of 30s
+                      context_options={
+                          "java_script_enabled": True,
+                      },
                   )
                   if api.sessions:
                       acquired = api.sessions[0].ms_token
