@@ -37,7 +37,6 @@ jobs:
           import asyncio, json, os, time, sys
           from pathlib import Path
           from TikTokApi import TikTokApi
-          from playwright.async_api import async_playwright
 
           OUTPUT_DIR = Path("trending")
           OUTPUT_DIR.mkdir(exist_ok=True)
@@ -45,7 +44,8 @@ jobs:
           ms_token = os.environ.get("MS_TOKEN", "").strip() or None
           print(f"MS_TOKEN provided: {'YES (' + ms_token[:12] + '...)' if ms_token else 'NO'}")
 
-          async def collect(iterator, results, limit=50):
+          async def collect(iterator, limit=50):
+              results = []
               async for video in iterator:
                   info = video.as_dict
                   vid_id = info.get("id") or info.get("aweme_id", "")
@@ -63,6 +63,20 @@ jobs:
                   print(f"  [{len(results):02d}] @{author}  \u2764 {likes:,}")
                   if len(results) >= limit:
                       break
+              return results
+
+          async def try_source(label, coro, timeout=60):
+              print(f"\nTrying {label}...")
+              try:
+                  results = await asyncio.wait_for(coro, timeout=timeout)
+                  print(f"  Got {len(results)} videos")
+                  return results
+              except asyncio.TimeoutError:
+                  print(f"  {label} timed out after {timeout}s")
+                  return []
+              except Exception as e:
+                  print(f"  {label} failed: {e}")
+                  return []
 
           async def main():
               results = []
@@ -76,37 +90,34 @@ jobs:
                       ms_tokens=[ms_token] if ms_token else None,
                       suppress_resource_load_types=["image", "media", "font", "stylesheet"],
                       starting_url="https://www.tiktok.com",
-                      timeout=60000,   # 60s instead of 30s
-                      context_options={
-                          "java_script_enabled": True,
-                      },
+                      timeout=60000,
                   )
                   if api.sessions:
                       acquired = api.sessions[0].ms_token
                       print(f"Session msToken: {'YES (' + acquired[:12] + '...)' if acquired else 'NO'}")
 
                   # Stage 1: trending.videos()
-                  print("\n[1] Trying trending.videos()...")
-                  try:
-                      await collect(api.trending.videos(count=50), results)
-                  except Exception as e:
-                      print(f"  Failed: {e}")
+                  results = await try_source(
+                      "[1] trending.videos()",
+                      collect(api.trending.videos(count=50)),
+                      timeout=60,
+                  )
 
                   # Stage 2: #fyp hashtag
                   if len(results) < 20:
-                      print("\n[2] Trying #fyp hashtag...")
-                      try:
-                          await collect(api.hashtag(name="fyp").videos(count=50), results)
-                      except Exception as e:
-                          print(f"  Failed: {e}")
+                      results = await try_source(
+                          "[2] #fyp hashtag",
+                          collect(api.hashtag(name="fyp").videos(count=50)),
+                          timeout=90,
+                      )
 
                   # Stage 3: #viral hashtag
                   if len(results) < 20:
-                      print("\n[3] Trying #viral hashtag...")
-                      try:
-                          await collect(api.hashtag(name="viral").videos(count=50), results)
-                      except Exception as e:
-                          print(f"  Failed: {e}")
+                      results = await try_source(
+                          "[3] #viral hashtag",
+                          collect(api.hashtag(name="viral").videos(count=50)),
+                          timeout=90,
+                      )
 
               print(f"\nTotal: {len(results)} videos")
               if not results:
