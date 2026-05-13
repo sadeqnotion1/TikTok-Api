@@ -3,7 +3,7 @@ name: Fetch TikTok Trending
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 6 * * *"   # daily at 6am UTC
+    - cron: "0 6 * * *"
 
 permissions:
   contents: write
@@ -25,88 +25,87 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: |
-          pip install TikTokApi playwright
-          playwright install chromium --with-deps
+        run: pip install yt-dlp
 
-      - name: Fetch top 50 trending videos
+      - name: Fetch top 50 trending via yt-dlp
+        run: |
+          mkdir -p trending/thumbnails
+
+          echo "Fetching trending metadata..."
+          yt-dlp \
+            --flat-playlist \
+            --print-json \
+            --playlist-end 50 \
+            "https://www.tiktok.com/trending" \
+            > trending/raw.ndjson 2>&1 || true
+
+          echo ""
+          echo "Lines in raw output:"
+          wc -l trending/raw.ndjson
+
+      - name: Parse results and save files
         run: |
           python - <<'PYEOF'
-          import asyncio, json, time
+          import json, time
           from pathlib import Path
-          from TikTokApi import TikTokApi
 
-          OUTPUT_DIR = Path("trending")
-          OUTPUT_DIR.mkdir(exist_ok=True)
+          raw = Path("trending/raw.ndjson").read_text(errors="ignore")
+          results = []
+          for line in raw.splitlines():
+              line = line.strip()
+              if not line.startswith("{"):
+                  continue
+              try:
+                  item = json.loads(line)
+              except Exception:
+                  continue
+              vid_id  = item.get("id", "")
+              author  = item.get("uploader") or item.get("uploader_id") or "unknown"
+              desc    = item.get("title", "")[:120]
+              likes   = item.get("like_count", 0) or 0
+              plays   = item.get("view_count", 0) or 0
+              url     = item.get("webpage_url") or f"https://www.tiktok.com/@{author}/video/{vid_id}"
+              results.append({
+                  "rank":   len(results) + 1,
+                  "url":    url,
+                  "author": author,
+                  "id":     vid_id,
+                  "desc":   desc,
+                  "likes":  likes,
+                  "plays":  plays,
+              })
+              print(f"  [{len(results):02d}] @{author}  ❤ {likes:,}")
 
-          async def main():
-              results = []
-              async with TikTokApi() as api:
-                  await api.create_sessions(
-                      num_sessions=1,
-                      sleep_after=3,
-                      headless=True,
-                  )
-                  print("Fetching trending videos...")
-                  async for video in api.trending.videos(count=50):
-                      info = video.as_dict
-                      vid_id  = info.get("id") or info.get("aweme_id", "")
-                      author  = (info.get("author") or {}).get("uniqueId", "unknown")
-                      desc    = info.get("desc", "")
-                      likes   = (info.get("stats") or info.get("statistics") or {}).get("diggCount", 0)
-                      plays   = (info.get("stats") or info.get("statistics") or {}).get("playCount", 0)
-                      url     = f"https://www.tiktok.com/@{author}/video/{vid_id}"
-                      results.append({
-                          "rank":   len(results) + 1,
-                          "url":    url,
-                          "author": author,
-                          "id":     vid_id,
-                          "desc":   desc[:120],
-                          "likes":  likes,
-                          "plays":  plays,
-                      })
-                      print(f"  [{len(results):02d}] @{author}/video/{vid_id}  ❤ {likes:,}")
-                      if len(results) >= 50:
-                          break
+          print(f"\nParsed: {len(results)} videos")
 
-              print(f"\nTotal collected: {len(results)}")
+          if not results:
+              print("WARNING: 0 results parsed — yt-dlp may not support /trending directly")
+              exit(0)
 
-              # Save as JSON
-              out_json = OUTPUT_DIR / "trending.json"
-              with open(out_json, "w") as f:
-                  json.dump(results, f, indent=2, ensure_ascii=False)
-              print(f"Saved JSON: {out_json}")
+          Path("trending/trending.json").write_text(
+              json.dumps(results, indent=2, ensure_ascii=False))
 
-              # Save plain URL list
-              out_txt = OUTPUT_DIR / "trending_urls.txt"
-              with open(out_txt, "w") as f:
-                  for r in results:
-                      f.write(r["url"] + "\n")
-              print(f"Saved URLs: {out_txt}")
+          Path("trending/trending_urls.txt").write_text(
+              "\n".join(r["url"] for r in results) + "\n")
 
-              # Save markdown table
-              out_md = OUTPUT_DIR / "trending.md"
-              with open(out_md, "w") as f:
-                  f.write(f"# TikTok Trending — {time.strftime('%Y-%m-%d %H:%M UTC')}\n\n")
-                  f.write("| # | Author | Likes | Plays | Link |\n")
-                  f.write("|---|--------|-------|-------|------|\n")
-                  for r in results:
-                      f.write(f"| {r['rank']} | @{r['author']} | {r['likes']:,} | {r['plays']:,} | [video]({r['url']}) |\n")
-              print(f"Saved markdown: {out_md}")
+          md = f"# TikTok Trending — {time.strftime('%Y-%m-%d %H:%M UTC')}\n\n"
+          md += "| # | Author | Likes | Plays | Link |\n"
+          md += "|---|--------|-------|-------|------|\n"
+          for r in results:
+              md += f"| {r['rank']} | @{r['author']} | {r['likes']:,} | {r['plays']:,} | [video]({r['url']}) |\n"
+          Path("trending/trending.md").write_text(md)
 
-          asyncio.run(main())
+          print("Files saved: trending.json, trending_urls.txt, trending.md")
           PYEOF
 
-      - name: Download thumbnails via yt-dlp
+      - name: Download thumbnails
         run: |
-          pip install yt-dlp -q
-          mkdir -p trending/thumbnails
           if [ ! -s trending/trending_urls.txt ]; then
             echo "No URLs, skipping thumbnails."; exit 0
           fi
           i=1
           while IFS= read -r url; do
-            echo "[$i/50] $url"
+            echo "[$i] $url"
             yt-dlp \
               --write-thumbnail \
               --write-info-json \
@@ -115,9 +114,13 @@ jobs:
               "$url" 2>&1 || true
             i=$((i+1))
           done < trending/trending_urls.txt
-          echo ""
-          echo "=== Thumbnails ==="
           ls -lh trending/thumbnails/ | head -20
+
+      - name: Show raw output if empty
+        if: always()
+        run: |
+          echo "=== raw.ndjson (first 50 lines) ==="
+          head -50 trending/raw.ndjson 2>/dev/null || echo "(file missing)"
 
       - name: Commit results
         run: |
