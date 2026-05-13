@@ -385,12 +385,18 @@ class TikTokApi:
             # Set the navigation timeout
             page.set_default_navigation_timeout(timeout)
 
-            # by doing this, we are simulate scroll event using mouse to `avoid` bot detection
+            # simulate scroll event using mouse to avoid bot detection
             x, y = random.randint(0, 50), random.randint(0, 50)
             a, b = random.randint(1, 50), random.randint(100, 200)
 
             await page.mouse.move(x, y)
-            await page.wait_for_load_state("networkidle")
+            # Use domcontentloaded instead of networkidle.
+            # TikTok keeps making background requests indefinitely, so networkidle
+            # always times out in headless/CI environments.
+            try:
+                await page.wait_for_load_state("domcontentloaded", timeout=timeout)
+            except TimeoutError:
+                self.logger.warning("domcontentloaded timed out, proceeding anyway")
             await page.mouse.move(a, b)
 
             session = TikTokPlaywrightSession(
