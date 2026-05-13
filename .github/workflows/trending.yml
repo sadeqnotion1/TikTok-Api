@@ -42,7 +42,26 @@ jobs:
           OUTPUT_DIR.mkdir(exist_ok=True)
 
           ms_token = os.environ.get("MS_TOKEN", "").strip() or None
-          print(f"MS_TOKEN provided: {'YES (' + ms_token[:12] + '...)' if ms_token else 'NO - will try auto-detect'}")
+          print(f"MS_TOKEN provided: {'YES (' + ms_token[:12] + '...)' if ms_token else 'NO'}")
+
+          async def collect(iterator, results, limit=50):
+              async for video in iterator:
+                  info = video.as_dict
+                  vid_id = info.get("id") or info.get("aweme_id", "")
+                  author = (info.get("author") or {}).get("uniqueId", "unknown")
+                  desc   = info.get("desc", "")[:120]
+                  stats  = info.get("stats") or info.get("statistics") or {}
+                  likes  = stats.get("diggCount", 0)
+                  plays  = stats.get("playCount", 0)
+                  url    = f"https://www.tiktok.com/@{author}/video/{vid_id}"
+                  results.append({
+                      "rank": len(results) + 1,
+                      "url": url, "author": author, "id": vid_id,
+                      "desc": desc, "likes": likes, "plays": plays,
+                  })
+                  print(f"  [{len(results):02d}] @{author}  \u2764 {likes:,}")
+                  if len(results) >= limit:
+                      break
 
           async def main():
               results = []
@@ -57,40 +76,37 @@ jobs:
                       suppress_resource_load_types=["image", "media", "font"],
                       starting_url="https://www.tiktok.com",
                   )
-
                   if api.sessions:
                       acquired = api.sessions[0].ms_token
                       print(f"Session msToken: {'YES (' + acquired[:12] + '...)' if acquired else 'NO'}")
 
-                  print("\nFetching trending videos...")
+                  # Stage 1: trending.videos()
+                  print("\n[1] Trying trending.videos()...")
                   try:
-                      async for video in api.trending.videos(count=50):
-                          info = video.as_dict
-                          vid_id  = info.get("id") or info.get("aweme_id", "")
-                          author  = (info.get("author") or {}).get("uniqueId", "unknown")
-                          desc    = info.get("desc", "")[:120]
-                          stats   = info.get("stats") or info.get("statistics") or {}
-                          likes   = stats.get("diggCount", 0)
-                          plays   = stats.get("playCount", 0)
-                          url     = f"https://www.tiktok.com/@{author}/video/{vid_id}"
-                          results.append({
-                              "rank":   len(results) + 1,
-                              "url":    url,
-                              "author": author,
-                              "id":     vid_id,
-                              "desc":   desc,
-                              "likes":  likes,
-                              "plays":  plays,
-                          })
-                          print(f"  [{len(results):02d}] @{author}  \u2764 {likes:,}")
-                          if len(results) >= 50:
-                              break
+                      await collect(api.trending.videos(count=50), results)
                   except Exception as e:
-                      print(f"ERROR: {e}")
-                      if not results:
-                          sys.exit(1)
+                      print(f"  Failed: {e}")
+
+                  # Stage 2: #fyp hashtag
+                  if len(results) < 20:
+                      print("\n[2] Trying #fyp hashtag...")
+                      try:
+                          await collect(api.hashtag(name="fyp").videos(count=50), results)
+                      except Exception as e:
+                          print(f"  Failed: {e}")
+
+                  # Stage 3: #viral hashtag
+                  if len(results) < 20:
+                      print("\n[3] Trying #viral hashtag...")
+                      try:
+                          await collect(api.hashtag(name="viral").videos(count=50), results)
+                      except Exception as e:
+                          print(f"  Failed: {e}")
 
               print(f"\nTotal: {len(results)} videos")
+              if not results:
+                  print("ERROR: All sources failed")
+                  sys.exit(1)
 
               (OUTPUT_DIR / "trending.json").write_text(
                   json.dumps(results, indent=2, ensure_ascii=False))
