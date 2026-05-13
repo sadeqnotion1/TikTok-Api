@@ -1,0 +1,128 @@
+name: Fetch TikTok Trending
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * *"   # daily at 6am UTC
+
+permissions:
+  contents: write
+
+jobs:
+  fetch-trending:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install TikTokApi playwright
+          playwright install chromium --with-deps
+
+      - name: Fetch top 50 trending videos
+        run: |
+          python - <<'PYEOF'
+          import asyncio, json, time
+          from pathlib import Path
+          from TikTokApi import TikTokApi
+
+          OUTPUT_DIR = Path("trending")
+          OUTPUT_DIR.mkdir(exist_ok=True)
+
+          async def main():
+              results = []
+              async with TikTokApi() as api:
+                  await api.create_sessions(
+                      num_sessions=1,
+                      sleep_after=3,
+                      headless=True,
+                  )
+                  print("Fetching trending videos...")
+                  async for video in api.trending.videos(count=50):
+                      info = video.as_dict
+                      vid_id  = info.get("id") or info.get("aweme_id", "")
+                      author  = (info.get("author") or {}).get("uniqueId", "unknown")
+                      desc    = info.get("desc", "")
+                      likes   = (info.get("stats") or info.get("statistics") or {}).get("diggCount", 0)
+                      plays   = (info.get("stats") or info.get("statistics") or {}).get("playCount", 0)
+                      url     = f"https://www.tiktok.com/@{author}/video/{vid_id}"
+                      results.append({
+                          "rank":   len(results) + 1,
+                          "url":    url,
+                          "author": author,
+                          "id":     vid_id,
+                          "desc":   desc[:120],
+                          "likes":  likes,
+                          "plays":  plays,
+                      })
+                      print(f"  [{len(results):02d}] @{author}/video/{vid_id}  ❤ {likes:,}")
+                      if len(results) >= 50:
+                          break
+
+              print(f"\nTotal collected: {len(results)}")
+
+              # Save as JSON
+              out_json = OUTPUT_DIR / "trending.json"
+              with open(out_json, "w") as f:
+                  json.dump(results, f, indent=2, ensure_ascii=False)
+              print(f"Saved JSON: {out_json}")
+
+              # Save plain URL list
+              out_txt = OUTPUT_DIR / "trending_urls.txt"
+              with open(out_txt, "w") as f:
+                  for r in results:
+                      f.write(r["url"] + "\n")
+              print(f"Saved URLs: {out_txt}")
+
+              # Save markdown table
+              out_md = OUTPUT_DIR / "trending.md"
+              with open(out_md, "w") as f:
+                  f.write(f"# TikTok Trending — {time.strftime('%Y-%m-%d %H:%M UTC')}\n\n")
+                  f.write("| # | Author | Likes | Plays | Link |\n")
+                  f.write("|---|--------|-------|-------|------|\n")
+                  for r in results:
+                      f.write(f"| {r['rank']} | @{r['author']} | {r['likes']:,} | {r['plays']:,} | [video]({r['url']}) |\n")
+              print(f"Saved markdown: {out_md}")
+
+          asyncio.run(main())
+          PYEOF
+
+      - name: Download thumbnails via yt-dlp
+        run: |
+          pip install yt-dlp -q
+          mkdir -p trending/thumbnails
+          if [ ! -s trending/trending_urls.txt ]; then
+            echo "No URLs, skipping thumbnails."; exit 0
+          fi
+          i=1
+          while IFS= read -r url; do
+            echo "[$i/50] $url"
+            yt-dlp \
+              --write-thumbnail \
+              --write-info-json \
+              --skip-download \
+              --output "trending/thumbnails/$(printf '%02d' $i)_%(uploader)s_%(id)s.%(ext)s" \
+              "$url" 2>&1 || true
+            i=$((i+1))
+          done < trending/trending_urls.txt
+          echo ""
+          echo "=== Thumbnails ==="
+          ls -lh trending/thumbnails/ | head -20
+
+      - name: Commit results
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add trending/ 2>/dev/null || true
+          git diff --cached --quiet || git commit -m "chore: TikTok trending $(date -u '+%Y-%m-%d') [skip ci]"
+          git push
